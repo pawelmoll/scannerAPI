@@ -1,3 +1,7 @@
+#include <stdint.h>
+
+#include <QtEndian>
+
 #include "viewer.h"
 #include "ui_viewer.h"
 #include "../scanner.h"
@@ -67,6 +71,58 @@ QString Viewer::showImage(void)
     return QString("Obtained %1 bytes big image, %2x%3 pixels").arg(size).arg(caps.image_width).arg(caps.image_height);
 }
 
+void Viewer::drawMinutiae(void *buffer)
+{
+    unsigned char *data = (unsigned char *)buffer;
+    struct iso_header {
+        uint32_t format_id;
+        uint32_t version;
+        uint32_t total_length;
+        uint16_t capture_device;
+        uint16_t size_x;
+        uint16_t size_y;
+        uint16_t res_x;
+        uint16_t res_y;
+        uint8_t number_views;
+        uint8_t res;
+    } *header;
+    struct iso_view {
+        uint8_t finger_position;
+        uint8_t view_number__impression_type;
+        uint8_t finger_quality;
+        uint8_t number_minutiae;
+    } *view;
+    struct iso_minutae {
+        uint16_t type_x;
+        uint16_t type_y;
+        uint8_t angle;
+        uint8_t quality;
+    } *minutae;
+    int v, m;
+
+    header = (struct iso_header *)data;
+    data += sizeof(*header);
+
+    if (qFromBigEndian(header->format_id) != 0x464d5200)
+        return;
+
+    for (v = 0; v < qFromBigEndian(header->number_views); v++) {
+        view = (struct iso_view *)data;
+        data += sizeof(*view);
+
+        for (m = 0; m < qFromBigEndian(view->number_minutiae); m++) {
+            minutae = (struct iso_minutae *)data;
+            data += sizeof(*minutae);
+
+            int x = qFromBigEndian(minutae->type_x) & 0x3fff;
+            int y = qFromBigEndian(minutae->type_y) & 0x3fff;
+
+            scene.addRect(x - 1, y - 1, 3, 3, QPen(Qt::red), QBrush());
+            scene.addRect(x - 2, y - 2, 5, 5, QPen(Qt::red), QBrush());
+        }
+    }
+}
+
 QString Viewer::showTemplate(void)
 {
     int size = scanner_get_iso_template(NULL, 0);
@@ -87,6 +143,8 @@ QString Viewer::showTemplate(void)
         hex.append(QString::number(buffer[i], 16).rightJustified(2, '0')).append(' ');
 
     ui->templateText->setPlainText(hex);
+
+    drawMinutiae(buffer);
 
     free(buffer);
 

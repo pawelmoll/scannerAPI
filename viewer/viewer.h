@@ -40,6 +40,7 @@ private:
 
     QString showImage(void);
     QString showTemplate(void);
+    void drawMinutiae(void *buffer);
 };
 
 #endif // VIEWER_H
