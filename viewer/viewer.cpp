@@ -12,8 +12,10 @@ Viewer::Viewer(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    for (int i = 0; i < 256; i++)
+    for (int i = 0; i < 256; i++) {
         grayScale.append(qRgb(i, i, i));
+        grayScaleInverted.append(qRgb(255 - i, 255 - i, 255 - i));
+    }
 }
 
 Viewer::~Viewer()
@@ -54,7 +56,10 @@ QString Viewer::showImage(void)
     case scanner_caps::scanner_image_gray_8bit:
         image = QImage(buffer, caps.image_width, caps.image_height, QImage::Format_Indexed8);
         image.setColorTable(grayScale);
-
+        break;
+    case scanner_caps::scanner_image_gray_8bit_inversed:
+        image = QImage(buffer, caps.image_width, caps.image_height, QImage::Format_Indexed8);
+        image.setColorTable(grayScaleInverted);
         break;
     default:
         return QString("Obtained unknown image format (%1)").arg(caps.image_format);

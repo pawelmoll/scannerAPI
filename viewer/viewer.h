@@ -37,6 +37,7 @@ private:
     QGraphicsScene scene;
     QPixmap pixmap;
     QVector<QRgb> grayScale;
+    QVector<QRgb> grayScaleInverted;
 
     QString showImage(void);
     QString showTemplate(void);
