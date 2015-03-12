@@ -45,6 +45,7 @@ struct scanner_caps {
 
 	enum {
 		scanner_image_gray_8bit,
+		scanner_image_gray_8bit_inversed,
 	} image_format;
 	int image_width, image_height;
 };
