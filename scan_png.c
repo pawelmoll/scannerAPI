@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
 	struct scanner_caps caps;
 	int size;
 	unsigned char *image;
+	int i;
 
 	while ((opt = getopt(argc, argv, "h")) != -1) {
 		switch (opt) {
@@ -142,6 +143,10 @@ int main(int argc, char *argv[])
 	}
 
 	switch(caps.image_format) {
+	case scanner_image_gray_8bit_inversed:
+		for (i = 0; i < size; i++)
+			image[i] = 0xff - image[i];
+		/* Fall through */
 	case scanner_image_gray_8bit:
 		err = write_grey_8bit_png(fl, image,
 				caps.image_width, caps.image_height);
