@@ -41,6 +41,10 @@ int main(void)
 			format = "8-bit gray scale";
 			bytes_per_pixel = 1;
 			break;
+		case scanner_image_gray_8bit_inversed:
+			format = "8-bit inversed gray scale";
+			bytes_per_pixel = 1;
+			break;
 		default: /* Unknown format */
 			assert(0);
 			return 1;
