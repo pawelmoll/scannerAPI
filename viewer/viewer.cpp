@@ -158,7 +158,15 @@ QString Viewer::showTemplate(void)
 
 void Viewer::on_scanButton_clicked()
 {
-    int err = scanner_scan(ui->timeoutSlider->value() * 1000);
+    int err;
+    int timeout = ui->timeoutSlider->value();
+
+    if (timeout == ui->timeoutSlider->maximum())
+        timeout = -1;
+    else
+        timeout *= 1000;
+
+    err = scanner_scan(timeout);
 
     if (err == -1) {
         message("Timeout...");
