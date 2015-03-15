@@ -59,7 +59,7 @@ static void isodecode(FILE *fl, void *buffer, int size)
 		uint32_t format_id;
 		uint32_t version;
 		uint32_t total_length;
-		uint16_t capture_equip_cert__capture_device_type_id;
+		uint16_t capture_equip_cert__capture_device_type_id; /* 4 bits __ 12 bits */
 		uint16_t size_x;
 		uint16_t size_y;
 		uint16_t resolution_x;
@@ -69,16 +69,17 @@ static void isodecode(FILE *fl, void *buffer, int size)
 	} *header_be, header;
 	struct iso_view {
 		uint8_t finger_position;
-		uint8_t view_number__impression_type;
+		uint8_t view_number__impression_type; /* 4 bits __ 4 bits */
 		uint8_t finger_quality;
 		uint8_t number_minutiae;
 	} *view;
 	struct iso_minutae {
-		uint16_t type__x;
-		uint16_t reserved__y;
+		uint16_t type__x; /* 2 bits __ 14 bits */
+		uint16_t reserved__y; /* 2 bits __ 14 bits */
 		uint8_t angle;
 		uint8_t quality;
 	} *minutae_be, minutae;
+	uint16_t extended_data_block_length;
 	int v, m;
 
 	if (size < sizeof(header)) {
@@ -249,7 +250,7 @@ static void isodecode(FILE *fl, void *buffer, int size)
 			fprintf(fl, "\t\tAngle: %u.%05u deg (%u * 1.40625)\n",
 					angle / 100000, angle % 100000,
 					minutae.angle);
-			if (minutae.angle == 0)
+			if (minutae.quality == 0)
 				fprintf(fl, "\t\tQuality: not reported\n");
 			else
 				fprintf(fl, "\t\tQuality: %u\n",
@@ -258,6 +259,22 @@ static void isodecode(FILE *fl, void *buffer, int size)
 			data += sizeof(minutae);
 			size -= sizeof(minutae);
 		}
+
+		if (size < sizeof(extended_data_block_length)) {
+			fprintf(stderr, "Template too short for the extended data block length field!\n");
+			return;
+		}
+#if BE
+		extended_data_block_length = *((uint16_t *)data);
+#else
+		extended_data_block_length = bswap_16(*((uint16_t *)data));
+#endif
+		fprintf(fl, "\n\tExtended data block length: %d bytes (skipping)\n",
+				extended_data_block_length);
+		data += sizeof(extended_data_block_length) +
+			extended_data_block_length;
+		size -= sizeof(extended_data_block_length) +
+				extended_data_block_length;
 	}
 }
 
