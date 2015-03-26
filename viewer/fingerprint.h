@@ -25,15 +25,8 @@ class FingerprintMinutiaeRecordException : public std::exception
     int error;
 
 public:
-    virtual int code()
-    {
-        return error;
-    }
-
-    virtual const char* what()
-    {
-        return message;
-    }
+    virtual int code() { return error; }
+    virtual const char* what() { return message; }
 
     FingerprintMinutiaeRecordException(const char *message, int error = 0) : message(message), error(error) {}
 };
