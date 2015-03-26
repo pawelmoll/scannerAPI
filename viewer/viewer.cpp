@@ -3,6 +3,7 @@
 #include <QtConcurrent>
 #include <QException>
 #include <QFuture>
+#include <QGraphicsRectItem>
 
 #include "viewer.h"
 #include "ui_viewer.h"
@@ -88,9 +89,13 @@ void Viewer::scannerFinished()
         ui->templateText->setPlainText(fingerprint->minutiaeRecord->getRecord());
 
         if (fingerprint->image) {
-            for (std::list<FingerprintMinutia>::iterator m = fingerprint->minutiaeRecord->minutiae.begin(); m != fingerprint->minutiaeRecord->minutiae.end(); m++) {
-                scene.addRect(m->x - 1, m->y - 1, 3, 3, QPen(Qt::red), QBrush());
-                scene.addRect(m->x - 2, m->y - 2, 5, 5, QPen(Qt::red), QBrush());
+            for (std::list<FingerprintMinutia>::iterator m = fingerprint->minutiaeRecord->minutiae.begin();
+                 m != fingerprint->minutiaeRecord->minutiae.end(); m++) {
+                QString label = QString("Minutia %1").arg(std::distance(fingerprint->minutiaeRecord->minutiae.begin(), m));
+                QGraphicsRectItem *rect = scene.addRect(m->x - 1, m->y - 1, 3, 3, QPen(Qt::red), QBrush());
+                rect->setToolTip(label);
+                rect = scene.addRect(m->x - 2, m->y - 2, 5, 5, QPen(Qt::red), QBrush());
+                rect->setToolTip(label);
             }
         }
     }
