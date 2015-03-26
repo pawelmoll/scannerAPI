@@ -1,6 +1,7 @@
 #ifndef VIEWER_H
 #define VIEWER_H
 
+#include <QFutureWatcher>
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include "scanner.h"
@@ -24,6 +25,8 @@ private slots:
 
     void on_timeoutSlider_valueChanged(int position);
 
+    void scannerFinished();
+
 private:
     Ui::Viewer *ui;
 
@@ -34,6 +37,8 @@ private:
     void message(QString message);
     void error(const char *message, int error);
 
+    Fingerprint *scanStart(int timeout);
+    QFutureWatcher<Fingerprint *> scanner_watcher;
     Scanner *scanner;
 };
 

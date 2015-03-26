@@ -1,6 +1,8 @@
 #include <stdint.h>
 
-#include <QtEndian>
+#include <QtConcurrent>
+#include <QException>
+#include <QFuture>
 
 #include "viewer.h"
 #include "ui_viewer.h"
@@ -11,6 +13,7 @@ Viewer::Viewer(QWidget *parent) :
     enabled(false)
 {
     ui->setupUi(this);
+    connect(&scanner_watcher, SIGNAL(finished()), this, SLOT(scannerFinished()));
     on_timeoutSlider_valueChanged(ui->timeoutSlider->value());
 }
 
@@ -27,35 +30,51 @@ void Viewer::message(QString message)
 
 void Viewer::error(const char *message, int error)
 {
-    ui->statusLabel->setText(QString("%1 (%2)").arg(message).arg(error));
+    if (error)
+        ui->statusLabel->setText(QString("%1 (%2)").arg(message).arg(error));
+    else
+        ui->statusLabel->setText(QString(message));
     ui->statusLabel->setStyleSheet("color: red; font-weight: bold;");
 }
 
-void Viewer::on_scanButton_clicked()
+class ViewerScannerException : public QException
 {
-    int timeout = ui->timeoutSlider->value();
+    const char *message;
+    int error;
 
-    if (timeout == ui->timeoutSlider->maximum())
-        timeout = -1;
-    else
-        timeout *= 1000;
+public:
+    void raise() const { throw *this; }
+    ViewerScannerException *clone() const { return new ViewerScannerException(*this); }
 
-    Fingerprint *fingerprint;
+    int code() { return error; }
+    const char* what() { return message; }
+
+    ViewerScannerException(const char *message, int error = 0) : message(message), error(error) {}
+};
+
+Fingerprint *Viewer::scanStart(int timeout)
+{
+    Fingerprint *fingerprint = NULL;
     try {
         fingerprint = scanner->getFingerprint(timeout);
-    } catch (ScannerTimeout &e) {
-        message("Timeout...");
-        return;
     } catch (ScannerException &e) {
-        error(e.what(), e.code());
-        return;
+        throw ViewerScannerException(e.what(), e.code());
     }
 
-    QString status;
-    scene.clear();
-    ui->templateText->clear();
+    return fingerprint;
+}
 
-    if (fingerprint->image) {
+void Viewer::scannerFinished()
+{
+    Fingerprint *fingerprint = NULL;
+
+    try {
+        fingerprint = scanner_watcher.result();
+    } catch (ViewerScannerException &e) {
+        error(e.what(), e.code());
+    }
+
+    if (fingerprint && fingerprint->image) {
         QImage *image = fingerprint->image->getImage();
         pixmap = QPixmap::fromImage(*image);
         scene.addPixmap(pixmap);
@@ -65,7 +84,7 @@ void Viewer::on_scanButton_clicked()
         delete image;
     }
 
-    if (fingerprint->minutiaeRecord) {
+    if (fingerprint && fingerprint->minutiaeRecord) {
         ui->templateText->setPlainText(fingerprint->minutiaeRecord->getRecord());
 
         if (fingerprint->image) {
@@ -79,6 +98,30 @@ void Viewer::on_scanButton_clicked()
     ui->imageView->setScene(&scene);
 
     delete fingerprint;
+
+    ui->scanButton->setEnabled(true);
+    ui->onOffButton->setEnabled(true);
+    ui->timeoutSlider->setEnabled(true);
+}
+
+void Viewer::on_scanButton_clicked()
+{
+    int timeout = ui->timeoutSlider->value();
+
+    if (timeout == ui->timeoutSlider->maximum())
+        timeout = -1;
+    else
+        timeout *= 1000;
+
+    scene.clear();
+    ui->templateText->clear();
+
+    ui->onOffButton->setEnabled(false);
+    ui->timeoutSlider->setEnabled(false);
+    ui->scanButton->setEnabled(false);
+    QFuture<Fingerprint *> future = QtConcurrent::run(this, &Viewer::scanStart, timeout);
+    scanner_watcher.setFuture(future);
+    message("Scanning...");
 }
 
 void Viewer::on_onOffButton_clicked()
