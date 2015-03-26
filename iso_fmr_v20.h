@@ -1,6 +1,11 @@
 #ifndef __ISO_FMR_V20_H
 #define __ISO_FMR_V20_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdint.h>
 
 enum iso_fmr_v20_error {
@@ -63,5 +68,9 @@ const char *iso_fmr_v20_get_error_string(enum iso_fmr_v20_error error);
 const char *iso_fmr_v20_get_finger_position_string(uint8_t finger_position);
 const char *iso_fmr_v20_get_impression_type_string(uint8_t impression_type);
 const char *iso_fmr_v20_get_minutia_type_string(uint8_t minutia_type);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
