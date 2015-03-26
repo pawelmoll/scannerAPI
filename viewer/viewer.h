@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QGraphicsScene>
-#include "../scanner.h"
+#include "scanner.h"
 
 namespace Ui {
 class Viewer;
@@ -28,20 +28,13 @@ private:
     Ui::Viewer *ui;
 
     bool enabled;
-    struct scanner_caps caps;
+    QGraphicsScene scene;
+    QPixmap pixmap;
 
     void message(QString message);
     void error(const char *message, int error);
 
-    QImage image;
-    QGraphicsScene scene;
-    QPixmap pixmap;
-    QVector<QRgb> grayScale;
-    QVector<QRgb> grayScaleInverted;
-
-    QString showImage(void);
-    QString showTemplate(void);
-    void drawMinutiae(void *buffer);
+    Scanner *scanner;
 };
 
 #endif // VIEWER_H

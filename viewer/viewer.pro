@@ -13,9 +13,17 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        viewer.cpp
+        viewer.cpp \
+    ../iso_fmr_v20.c \
+    ../iso_fmr_v030.c \
+    fingerprint.cpp \
+    scanner.cpp
 
-HEADERS  += viewer.h
+HEADERS  += viewer.h \
+    ../iso_fmr_v20.h \
+    ../iso_fmr_v030.h \
+    fingerprint.h \
+    scanner.h
 
 FORMS    += viewer.ui
 
