@@ -7,7 +7,8 @@
 
 Viewer::Viewer(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::Viewer)
+    ui(new Ui::Viewer),
+    enabled(false)
 {
     ui->setupUi(this);
 }
