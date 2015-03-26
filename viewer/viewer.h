@@ -22,7 +22,7 @@ private slots:
 
     void on_onOffButton_clicked();
 
-    void on_timeoutSlider_sliderMoved(int position);
+    void on_timeoutSlider_valueChanged(int position);
 
 private:
     Ui::Viewer *ui;

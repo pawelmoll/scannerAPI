@@ -71,7 +71,7 @@
      <number>60</number>
     </property>
     <property name="value">
-     <number>60</number>
+     <number>10</number>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
@@ -87,7 +87,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Timeout: inifinite</string>
+     <string>Timeout:</string>
     </property>
    </widget>
    <widget class="QGraphicsView" name="imageView">

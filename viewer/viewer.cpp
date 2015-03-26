@@ -11,6 +11,7 @@ Viewer::Viewer(QWidget *parent) :
     enabled(false)
 {
     ui->setupUi(this);
+    on_timeoutSlider_valueChanged(ui->timeoutSlider->value());
 }
 
 Viewer::~Viewer()
@@ -103,18 +104,18 @@ void Viewer::on_onOffButton_clicked()
     ui->onOffButton->setText(enabled ? "Turn off" : "Turn on");
 }
 
-void Viewer::on_timeoutSlider_sliderMoved(int position)
+void Viewer::on_timeoutSlider_valueChanged(int value)
 {
     QString timeout;
 
-    if (position == ui->timeoutSlider->maximum())
+    if (value == ui->timeoutSlider->maximum())
         timeout = QString("infinite");
-    else if (position == 0)
+    else if (value == 0)
         timeout = QString("none");
-    else if (position == 1)
+    else if (value == 1)
         timeout = QString("1 second");
     else
-        timeout = QString("%1 seconds").arg(position);
+        timeout = QString("%1 seconds").arg(value);
 
     ui->timeoutLabel->setText(QString("Timeout: %1").arg(timeout));
 }
