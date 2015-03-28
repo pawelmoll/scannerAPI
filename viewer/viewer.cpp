@@ -16,6 +16,12 @@ Viewer::Viewer(QWidget *parent) :
     ui->setupUi(this);
     connect(&scanner_watcher, SIGNAL(finished()), this, SLOT(scannerFinished()));
     on_timeoutSlider_valueChanged(ui->timeoutSlider->value());
+
+    ScannersList &scanners_list = ScannersList::getScannersList();
+    for (std::vector<const char *>::iterator name = scanners_list.begin();
+         name != scanners_list.end(); name++) {
+        ui->scannersList->addItem(QString(*name));
+    }
 }
 
 Viewer::~Viewer()
@@ -133,20 +139,22 @@ void Viewer::on_onOffButton_clicked()
 {
     if (!enabled) {
         try {
-            scanner = new Scanner();
+            ScannersList &scanners_list = ScannersList::getScannersList();
+            scanner = new Scanner(scanners_list[ui->scannersList->currentIndex()]);
             message(QString("Turned on scanner '%1'").arg(scanner->getName()));
             enabled = true;
         } catch (ScannerException &e) {
             error(e.what(), e.code());
         }
     } else {
+        message(QString("Turned off scanner '%1'").arg(scanner->getName()));
         delete scanner;
         ui->templateText->clear();
         scene.clear();
-        message("Turned off scanner");
         enabled = false;
     }
 
+    ui->scannersList->setEnabled(!enabled);
     ui->scanButton->setEnabled(enabled);
     ui->timeoutSlider->setEnabled(enabled);
     ui->onOffButton->setText(enabled ? "Turn off" : "Turn on");

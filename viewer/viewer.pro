@@ -29,5 +29,5 @@ FORMS    += viewer.ui
 
 
 
-SOURCES += ../scanner_dummy.c ../example.c
-HEADERS += ../scanner.h ../example.h
+SOURCES += ../scanner_core.c ../scanner_init.c ../scanner_dummy.c ../example.c
+HEADERS += ../scanner.h

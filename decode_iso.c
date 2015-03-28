@@ -268,6 +268,25 @@ static void usage(const char *comm)
 	fprintf(stderr, "\tNAME\t(optional) input file, stdin by default\n");
 }
 
+static char cache[8]; /* Cache header and version fields */
+static int cache_used, cache_index;
+static int getc_cached(void *context)
+{
+	FILE *fl = context;
+	int c;
+
+	if (cache_index >= sizeof(cache))
+		return getc(fl);
+
+	if (cache_used <= cache_index) {
+		c = getc(fl);
+		if (c < 0)
+			return c;
+		cache[cache_used++] = c;
+	}
+
+	return cache[cache_index++];
+}
 
 int main(int argc, char *argv[])
 {
@@ -300,15 +319,15 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	v20_record = iso_fmr_v20_decode((int (*)(void *))getc, fl,
+	v20_record = iso_fmr_v20_decode(getc_cached, fl,
 			&v20_error, &bytes);
 	if (v20_error == iso_fmr_v20_invalid_version) {
 		struct iso_fmr_v030 *v030_record;
 		enum iso_fmr_v030_error v030_error;
 
-		fseek(fl, 0, SEEK_SET);
+		cache_index = 0; /* Re-read the header... */
 
-		v030_record = iso_fmr_v030_decode((int (*)(void *))getc, fl,
+		v030_record = iso_fmr_v030_decode(getc_cached, fl,
 			&v030_error, &bytes);
 		if (v030_error)
 			fprintf(stderr, "error: %s at byte %zu\n",

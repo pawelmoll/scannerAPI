@@ -51,30 +51,67 @@ static int write_grey_8bit_png(FILE *fl, void *image, int width, int height)
 
 static void usage(const char *comm)
 {
-	fprintf(stderr, "Usage: %s [-h] [NAME]\n", comm);
+	fprintf(stderr, "Usage: %s [-h|-l] -s SCANNER [-x|-b|-c] [NAME]\n", comm);
+	fprintf(stderr, "Usage: %s [-h|-l] -s SCANNER [NAME]\n", comm);
 	fprintf(stderr, "where:\n");
 	fprintf(stderr, "\t-h\tusage syntax (this message)\n");
+	fprintf(stderr, "\t-l\tprint list of available scanners\n");
+	fprintf(stderr, "\t-s SCANNER\tname of a scanner to be used\n");
 	fprintf(stderr, "\tNAME\t(optional) output file, stdout by default\n");
 }
 
+static void list(void)
+{
+	const char **list;
+	int num, i;
 
+	list = scanner_list(&num);
+	fprintf(stderr, "Available scanners:\n");
+	for (i = 0; i < num; i++)
+		fprintf(stderr, "\t%s\n", list[i]);
+
+	return;
+}
 
 int main(int argc, char *argv[])
 {
 	int opt;
 	FILE *fl = stdout;
 	int err;
+	struct scanner *scanner = NULL;
 	struct scanner_caps caps;
 	int size;
 	unsigned char *image;
 	int i;
 
-	while ((opt = getopt(argc, argv, "h")) != -1) {
+	err = scanner_init();
+	if (err) {
+		fprintf(stderr, "Failed to initialize scanner API (%d)\n", err);
+		return 1;
+	}
+
+	while ((opt = getopt(argc, argv, "hls:")) != -1) {
 		switch (opt) {
+		case 'l':
+			list();
+			return 1;
+		case 's':
+			scanner = scanner_get(optarg);
+			if (!scanner) {
+				fprintf(stderr, "invalid scanner '%s'!\n",
+						optarg);
+				return 1;
+			}
+			break;
 		default:
 			usage(argv[0]);
 			return 1;
 		}
+	}
+
+	if (!scanner) {
+		list();
+		return 1;
 	}
 
 	if (argc - optind == 1) {
@@ -88,13 +125,13 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	err = scanner_on();
+	err = scanner_on(scanner);
 	if (err) {
 		fprintf(stderr, "Failed to turn on scanner (%d)\n", err);
 		return 1;
 	}
 
-	err = scanner_get_caps(&caps);
+	err = scanner_get_caps(scanner, &caps);
 	if (err) {
 		fprintf(stderr, "Failed to get capabilities (%d)\n", err);
 		return 1;
@@ -105,7 +142,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	err = scanner_scan(-1);
+	err = scanner_scan(scanner, -1);
 	if (err == -1) {
 		fprintf(stderr, "Timeout when scanning...\n");
 		return 1;
@@ -115,7 +152,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	size = scanner_get_image(NULL, 0);
+	size = scanner_get_image(scanner, NULL, 0);
 	if (size == 0) {
 		fprintf(stderr, "No image size returned!\n");
 		return 1;
@@ -132,7 +169,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	size = scanner_get_image(image, size);
+	size = scanner_get_image(scanner, image, size);
 	if (size == 0) {
 		fprintf(stderr, "No image returned!\n");
 		return 1;
@@ -161,7 +198,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	scanner_off();
+	scanner_off(scanner);
 
 	free(image);
 

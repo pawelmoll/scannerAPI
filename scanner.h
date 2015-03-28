@@ -6,20 +6,67 @@ extern "C"
 {
 #endif
 
+struct scanner;
+
+/**
+ * scanner_init - initialises scanner API
+ *
+ * Must be called before any other function from this API is used!
+ *
+ * @returns:	0 for success
+ *		negative value for error
+ */
+int scanner_init(void);
+
+/**
+ * scanner_list - returns a list of scanner
+ *
+ * @number:	(pointer to a) number of scanners (size of the array)
+ *
+ * @returns:	pointer to an array of scanner names
+ */
+const char **scanner_list(int *number);
+
+/**
+ * scanner_get - obtains a pointer to a scanner
+ *
+ * There may be only one user of a scanner at any time.
+ *
+ * @name:	name of a scanner, one of the @scanner_list
+ *
+ * @returns:	pointer to a scanner when found and available
+ *		NULL when given name is wrong or the scanner is already in use
+ */
+struct scanner *scanner_get(const char *name);
+
+/**
+ * scanner_put - returns a pointer to a scanner
+ *
+ * Returns the scanner for other users.
+ *
+ * @scanner:	pointer to a scanner
+ */
+
+void scanner_put(struct scanner *scanner);
+
 /**
  * scanner_on - turn the scanner on
  *
- * A scanner must be turned on before any other function is called.
+ * Scanner must be turned on before any other scanner operation is called!
  *
- * @returns: 0 for success
- *           negative value for error
+ * @scanner:	pointer to a scanner
+ *
+ * @returns:	0 for success
+ *		negative value for error
  */
-int scanner_on(void);
+int scanner_on(struct scanner *scanner);
 
 /**
  * scanner_off - turn the scanner off
+ *
+ * @scanner: pointer to a scanner
  */
-void scanner_off(void);
+void scanner_off(struct scanner *scanner);
 
 /**
  * struct scanner_caps - scanner capabilities
@@ -53,16 +100,18 @@ struct scanner_caps {
 /**
  * scanner_get_caps - provide scanner capabilities
  *
- * @caps: pointer to capabilities structure
+ * @scanner:	pointer to a scanner
+ * @caps:	pointer to capabilities structure
  *
  * @returns: 0 for success
  *           negative value for error
  */
-int scanner_get_caps(struct scanner_caps *caps);
+int scanner_get_caps(struct scanner *scanner, struct scanner_caps *caps);
 
 /**
  * scanner_scan - perform a single scan
  *
+ * @scanner:    pointer to a scanner
  * @timeout:	in miliseconds
  *		0 checks if a scan is already available
  *		-1 waits infinitely until a scan is ready
@@ -71,7 +120,7 @@ int scanner_get_caps(struct scanner_caps *caps);
  *		-1 for timeout
  *		other negative value for error
  */
-int scanner_scan(int timeout);
+int scanner_scan(struct scanner *scanner, int timeout);
 
 /**
  * scanner_get_image - provide fingerprint image
@@ -81,6 +130,7 @@ int scanner_scan(int timeout);
  * can be lager than the given buffer size. This can be used to check the
  * required buffer size (call the function with size 0).
  *
+ * @scanner:    pointer to a scanner
  * @buffer:	pointer to a buffer to be filled with the image
  * @size:	buffer size in bytes
  *
@@ -88,7 +138,7 @@ int scanner_scan(int timeout);
  *			(can be larger than @size)
  *		negative value for error
  */
-int scanner_get_image(void *buffer, int size);
+int scanner_get_image(struct scanner *scanner, void *buffer, int size);
 
 /**
  * scanner_get_iso_template - provide ISO fingerprint template
@@ -99,6 +149,7 @@ int scanner_get_image(void *buffer, int size);
  * can be used to check the required buffer size (call the function with
  * size 0).
  *
+ * @scanner:    pointer to a scanner
  * @buffer:	pointer to a buffer to be filled with the template
  * @size:	buffer size in bytes
  *
@@ -106,7 +157,7 @@ int scanner_get_image(void *buffer, int size);
  *			(can be larger than @size)
  *		negative value for error
  */
-int scanner_get_iso_template(void *buffer, int size);
+int scanner_get_iso_template(struct scanner *scanner, void *buffer, int size);
 
 #ifdef __cplusplus
 }

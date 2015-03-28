@@ -6,6 +6,28 @@
 #include "fingerprint.h"
 #include "../scanner.h"
 
+
+
+class ScannersList
+{
+private:
+    std::vector<const char *> names;
+
+    ScannersList();
+
+    ScannersList(const ScannersList &);
+    ScannersList& operator =(const ScannersList& other);
+
+public:
+    std::vector<const char *>::iterator begin() { return names.begin(); }
+    std::vector<const char *>::iterator end() { return names.end(); }
+    const char *operator[](int n) { return names[n]; }
+
+    static ScannersList &getScannersList();
+};
+
+
+
 class ScannerException : public std::exception
 {
     const char *message;
@@ -29,6 +51,7 @@ public:
 class Scanner
 {
 private:
+    struct scanner *scanner;
     void *image;
     size_t image_size;
     void *iso_template;
@@ -36,7 +59,7 @@ private:
     struct scanner_caps caps;
 
 public:
-    Scanner();
+    Scanner(const char *name);
     ~Scanner();
 
     const char *getName();
