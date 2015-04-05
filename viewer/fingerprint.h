@@ -41,12 +41,20 @@ public:
 
 class FingerprintMinutiaeRecord
 {
+private:
+    char *binary;
+    size_t size;
+
 public:
     std::list<FingerprintMinutia> minutiae;
 
-    virtual ~FingerprintMinutiaeRecord() {}
+    FingerprintMinutiaeRecord(void *binary, size_t size);
+    virtual ~FingerprintMinutiaeRecord();
 
-    virtual QString getRecord() = 0;
+    virtual QString getHtml() = 0;
+
+    const void *getBinary() { return binary; }
+    size_t getSize() { return size; }
 };
 
 class FingerprintISOv20MinutiaeRecord : public FingerprintMinutiaeRecord
@@ -58,7 +66,7 @@ public:
     FingerprintISOv20MinutiaeRecord(void *binary, size_t size);
     ~FingerprintISOv20MinutiaeRecord();
 
-    QString getRecord();
+    QString getHtml();
 };
 
 class FingerprintISOv030MinutiaeRecord : public FingerprintMinutiaeRecord
@@ -70,7 +78,7 @@ public:
     FingerprintISOv030MinutiaeRecord(void *binary, size_t size);
     ~FingerprintISOv030MinutiaeRecord();
 
-    QString getRecord();
+    QString getHtml();
 };
 
 

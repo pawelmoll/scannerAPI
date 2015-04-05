@@ -5,9 +5,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = viewer
 TEMPLATE = app
 
-SOURCES += main.cpp viewer.cpp fingerprint.cpp scanner.cpp
+SOURCES += main.cpp viewer.cpp fingerprint.cpp scanner.cpp fingerprinttextbrowser.cpp
 
-HEADERS += viewer.h fingerprint.h scanner.h
+HEADERS += viewer.h fingerprint.h scanner.h fingerprinttextbrowser.h
 
 FORMS += viewer.ui
 

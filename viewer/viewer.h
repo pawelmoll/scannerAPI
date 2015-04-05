@@ -4,6 +4,7 @@
 #include <QFutureWatcher>
 #include <QMainWindow>
 #include <QGraphicsScene>
+#include <QTextBrowser>
 #include "scanner.h"
 
 namespace Ui {
@@ -18,6 +19,9 @@ public:
     explicit Viewer(QWidget *parent = 0);
     ~Viewer();
 
+    void highlightMinutia(int view, int minutia);
+    void scrollToMinutia(int view, int minutia);
+
 private slots:
     void on_scanButton_clicked();
 
@@ -27,12 +31,19 @@ private slots:
 
     void scannerFinished();
 
+    void on_saveFMRButton_clicked();
+
+    void on_saveImageButton_clicked();
+
 private:
     Ui::Viewer *ui;
 
     bool enabled;
     QGraphicsScene scene;
     QPixmap pixmap;
+    QGraphicsRectItem *highlight;
+
+    Fingerprint *fingerprint;
 
     void message(QString message);
     void error(const char *message, int error);

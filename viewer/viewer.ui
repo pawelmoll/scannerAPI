@@ -17,7 +17,7 @@
    <widget class="QPushButton" name="onOffButton">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>170</x>
       <y>580</y>
       <width>101</width>
       <height>27</height>
@@ -42,7 +42,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>590</x>
+      <x>280</x>
       <y>580</y>
       <width>101</width>
       <height>27</height>
@@ -61,7 +61,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>710</x>
+      <x>390</x>
       <y>590</y>
       <width>160</width>
       <height>19</height>
@@ -80,7 +80,7 @@
    <widget class="QLabel" name="timeoutLabel">
     <property name="geometry">
      <rect>
-      <x>710</x>
+      <x>390</x>
       <y>570</y>
       <width>161</width>
       <height>17</height>
@@ -100,7 +100,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QTextBrowser" name="templateText">
+   <widget class="FingerprintTextBrowser" name="templateText">
     <property name="geometry">
      <rect>
       <x>440</x>
@@ -126,7 +126,7 @@
    <widget class="QComboBox" name="scannersList">
     <property name="geometry">
      <rect>
-      <x>80</x>
+      <x>20</x>
       <y>580</y>
       <width>141</width>
       <height>26</height>
@@ -137,7 +137,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>580</y>
+      <y>560</y>
       <width>57</width>
       <height>18</height>
      </rect>
@@ -146,9 +146,48 @@
      <string>Scanner:</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="saveFMRButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>580</y>
+      <width>131</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save FMR as...</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="saveImageButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>580</y>
+      <width>131</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save image as...</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>FingerprintTextBrowser</class>
+   <extends>QTextBrowser</extends>
+   <header location="global">fingerprinttextbrowser.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
