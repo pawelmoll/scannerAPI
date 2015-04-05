@@ -4,7 +4,7 @@
 #include <exception>
 
 #include "fingerprint.h"
-#include "../scanner.h"
+#include "scanner/scanner.h"
 
 
 

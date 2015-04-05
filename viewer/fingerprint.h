@@ -4,8 +4,8 @@
 #include <list>
 #include <QImage>
 
-#include "../iso_fmr_v20.h"
-#include "../iso_fmr_v030.h"
+#include "iso_fmr/v20.h"
+#include "iso_fmr/v030.h"
 
 
 class FingerprintMinutia

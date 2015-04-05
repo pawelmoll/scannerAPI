@@ -1,0 +1,75 @@
+How to add a new scanner implementation?
+----------------------------------------
+
+1. Create a suitably named directory in "vendors", containing at least
+   two subdirectories:
+
+   * "include" - containing all header files required by vendor
+                 libraries;
+   * "lib" - containing all required vendor libraries; note that it's
+              a multiarch-style directory, meaning that it can contain
+              a GNU triplet subdirectories with different versions
+              of libraries (in other words, stick the x86 32-bit
+              libraries into "i386-linux-gnu" subdirectory, and the
+              64-bit ones into "x86_64-linux-gnu")
+
+   Optionally, you can also create other directories, which will not
+   be used by the build system, but may be useful otherwise, eg.:
+
+   * "etc" - containing all configuration required for a scanner, in
+             particular udev rules in "udev/rules.d" directory.
+
+  The vendor directory must also contain a "libs.mk" file, describing
+  all linker options required to build anything against the library,
+  makefile style, as it was adding extra fields to LDFLAGS.
+
+  Note: you MUST use the append operator ("+=", good example:
+        "LDFLAGS += -lmylib"), NOT just assign the value ("=" or ":=",
+        bad example: "LDFLAGS = -lmylib")!
+
+  For example, "foobar" vendor may provide an API consisting of
+  a single header, a single library (in two versions - 32-bit and
+  64-bit) and using pthreads library. In such case the directory will
+  look like this:
+
+  / scannerAPI
+  +- vendors
+     +- foobar
+        +- libs.mk # file containing: "LDFLAGS += -lfoobarapi -lpthread
+        +- include
+           +- foobarapi.h # API header
+        +- libs
+           +- i386-linux-gnu
+              +- libfoobarapi.so # 32-bit library
+           +- x86_64-linux-gnu
+              +- libfoobarapi.so # 64-bit library
+
+2. Add the new directory's name to the "VENDORS" list in
+   "vendors/vendors.mk" file, so it looks like this:
+
+   VENDORS = othervendor foobar
+
+3. In the "scanner" directory, create a C or C++ source file named in
+   the same way as the directory above (ie. "foobar.c" in our example),
+   implementing the scanner API operations ("struct scanner_ops") and
+   defining a single global function, doing all one-off initialisation
+   magic required by the vendor libraries and then registering the
+   operations with the scannerAPI core, for example:
+
+        scanner_register("foobar", &foobar_ops);
+
+   This initialisation function should be also described with the
+   __scanner_init(function) macro, for example:
+
+	__scanner_init(foobar_init);
+
+   See "scanner/dummy.c" for a working example.
+
+3a.  Add a call to the init function in the "scanner/init.c" file.
+
+     Note: this step should be automated, really (that's what the
+           "__scanner_init()" macro is about), but I couldn't be
+           bothered yet ;-)
+
+4. Build the command line tools by running "make" in the "scanner"
+   directory or UI using Qt Creator - it should Just Work (TM) now!

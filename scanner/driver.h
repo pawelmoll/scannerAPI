@@ -1,6 +1,11 @@
 #ifndef __SCANNER_DRIVER_H
 #define __SCANNER_DRIVER_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include "scanner.h"
 
 /**
@@ -51,5 +56,9 @@ int scanner_register(const char *name, struct scanner_ops *ops);
 #define __scanner_init(function) \
 	int (*__##function)(void) \
 			__attribute__((section("scanner_init"))) = function
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 extern int dummy_init(void);
-extern int les_init(void);
 
 int scanner_init(void) {
 	int err;

@@ -1,5 +1,5 @@
 #include <string.h>
-#include "scanner_driver.h"
+#include "driver.h"
 
 #define SCANNERS_MAX 8
 

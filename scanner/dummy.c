@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include "example.h"
-#include "scanner_driver.h"
+#include "driver.h"
 
 #define DUMMY_NAME "Dummy"
 
