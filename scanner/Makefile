@@ -12,8 +12,7 @@ LDFLAGS += $(patsubst %,-L../vendors/%/lib/$(ARCH),$(VENDORS))
 
 EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
-LD_LIBRARY_PATH := $(subst $(SPACE),:,$(patsubst %,$(abspath $(shell pwd)/../vendors/%/lib),$(VENDORS)))
-LD_LIBRARY_PATH += $(subst $(SPACE),:,$(patsubst %,$(abspath $(shell pwd)/../vendors/%/lib/$(ARCH)),$(VENDORS)))
+LD_LIBRARY_PATH := $(subst $(SPACE),:,$(patsubst %,$(abspath $(shell pwd)/../vendors/%/lib),$(VENDORS)) $(patsubst %,$(abspath $(shell pwd)/../vendors/%/lib/$(ARCH)),$(VENDORS)))
 include $(patsubst %,../vendors/%/libs.mk,$(VENDORS))
 
 all: scan_iso scan_png test setup.sh
