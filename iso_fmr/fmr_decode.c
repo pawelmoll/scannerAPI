@@ -261,7 +261,7 @@ static void v030dump(struct iso_fmr_v030 *record)
 
 static void usage(const char *comm)
 {
-	fprintf(stderr, "Usage: %s [-h] [-x|-b|-c] [NAME]\n", comm);
+	fprintf(stderr, "Usage: %s [-h] [-f] [NAME]\n", comm);
 	fprintf(stderr, "where:\n");
 	fprintf(stderr, "\t-h\tusage syntax (this message)\n");
 	fprintf(stderr, "\t-f\tforce dumping decoded information (despite of an error)\n");
