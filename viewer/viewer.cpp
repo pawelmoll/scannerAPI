@@ -262,7 +262,7 @@ void Viewer::on_saveFMRButton_clicked()
 void Viewer::on_saveImageButton_clicked()
 {
     QString filter;
-    QString name = QFileDialog::getSaveFileName(this, tr("Save FMR as..."), "", tr("PNG Images (*.png);;JPEG Images (*.jpg);;BMP Images (*.bmp);;All Files (*)"), &filter);
+    QString name = QFileDialog::getSaveFileName(this, tr("Save Image as..."), "", tr("PNG Images (*.png);;JPEG Images (*.jpg);;BMP Images (*.bmp);;All Files (*)"), &filter);
     if (!name.isEmpty()) {
         if (filter.contains("png") && !name.endsWith(".png", Qt::CaseInsensitive))
             name += ".png";
