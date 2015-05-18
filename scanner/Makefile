@@ -1,7 +1,7 @@
 include ../vendors/vendors.mk
 
-CFLAGS = -Wall -ggdb
-CXXFLAGS = -Wall -ggdb
+CFLAGS = -Wall -ggdb -fPIC
+CXXFLAGS = -Wall -ggdb -fPIC
 
 ARCH := $(shell gcc -print-multiarch)
 OBJS := core.o dummy.o init.o example.o $(addsuffix .o,$(VENDORS))
@@ -23,6 +23,7 @@ clean:
 	rm -f test test.o
 	rm -f $(OBJS)
 	rm -f setup.sh
+	rm -f pyscanner.so pyscanner.o scanner.pyc
 
 decode_iso.o: decode_iso.c
 
@@ -42,3 +43,16 @@ test: test.o $(OBJS)
 .PHONY: setup.sh
 setup.sh:
 	@echo export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):\$$LD_LIBRARY_PATH > $@
+
+# Python wrapper
+
+PYTHONINC ?= /usr/include/python2.7/
+
+.PHONY: python
+python: pyscanner.so
+
+pyscanner.so: pyscanner.o $(OBJS)
+	$(LD) -shared $^ -o $@ $(LDFLAGS)
+
+pyscanner.o: pyscanner.c
+	$(CC) -c $^ -o $@ -I$(PYTHONINC) $(CFLAGS)
