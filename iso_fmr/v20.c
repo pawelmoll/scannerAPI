@@ -245,9 +245,9 @@ struct iso_fmr_v20 *iso_fmr_v20_decode(int (*getbyte)(void *context),
 			}
 			view->extended_data_block = b;
 			memset(view->extended_data_block, 0, size);
- 
+
 			while (size--)
-				__get(*b);
+				__get(*b++);
 		}
 	}
 

@@ -427,7 +427,7 @@ struct iso_fmr_v030 *iso_fmr_v030_decode(int (*getbyte)(void *context),
 			repr->extended_data_block = b;
 
 			while (size--)
-				__get(*b);
+				__get(*b++);
 		}
 	}
 
