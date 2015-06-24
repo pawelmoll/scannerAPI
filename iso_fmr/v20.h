@@ -62,7 +62,16 @@ struct iso_fmr_v20_minutia {
 struct iso_fmr_v20 *iso_fmr_v20_decode(int (*getbyte)(void *context),
 		void *context, enum iso_fmr_v20_error *error, size_t *bytes);
 
+struct iso_fmr_v20 *iso_fmr_v20_init(void);
+struct iso_fmr_v20_view *iso_fmr_v20_add_view(struct iso_fmr_v20 *record,
+		uint16_t extended_data_block_length, void *extended_data_block);
+struct iso_fmr_v20_minutia *iso_fmr_v20_add_minutia(struct iso_fmr_v20 *record,
+		struct iso_fmr_v20_view *view);
+int iso_fmr_v20_encode(struct iso_fmr_v20 *record,
+		int (*putbyte)(int byte, void *context), void *context);
+
 void iso_fmr_v20_free(struct iso_fmr_v20 *record);
+
 
 const char *iso_fmr_v20_get_error_string(enum iso_fmr_v20_error error);
 const char *iso_fmr_v20_get_finger_position_string(uint8_t finger_position);

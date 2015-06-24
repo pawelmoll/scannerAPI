@@ -260,6 +260,138 @@ out:
 	return record;
 }
 
+
+struct iso_fmr_v20 *iso_fmr_v20_init(void)
+{
+	struct iso_fmr_v20 *record;
+
+	record = malloc(sizeof(*record));
+	if (!record)
+		return NULL;
+	memset(record, 0, sizeof(*record));
+
+	record->format_id = 0x464d5200;
+	record->version = 0x20323000;
+	record->total_length = 24;
+
+	return record;
+}
+
+struct iso_fmr_v20_view *iso_fmr_v20_add_view(struct iso_fmr_v20 *record,
+		uint16_t extended_data_block_length, void *extended_data_block)
+{
+	struct iso_fmr_v20_view *views = realloc(record->views,
+			sizeof(*views) * (record->number_views + 1));
+	struct iso_fmr_v20_view *view;
+
+	if (!views)
+		return NULL;
+	memset(&views[record->number_views], 0, sizeof(*views));
+
+	view = &views[record->number_views];
+
+	if (extended_data_block_length) {
+		view->extended_data_block = malloc(extended_data_block_length);
+		if (!view->extended_data_block)
+			return NULL;
+
+		memcpy(view->extended_data_block, extended_data_block,
+				extended_data_block_length);
+	}
+
+	record->number_views++;
+	record->total_length += 6 + extended_data_block_length;
+	record->views = views;
+
+	return view;
+}
+
+struct iso_fmr_v20_minutia *iso_fmr_v20_add_minutia(struct iso_fmr_v20 *record,
+		struct iso_fmr_v20_view *view)
+{
+	struct iso_fmr_v20_minutia *minutiae = realloc(view->minutiae,
+			sizeof(*minutiae) * (view->number_minutiae + 1));
+
+	if (!minutiae)
+		return NULL;
+	memset(&minutiae[view->number_minutiae], 0, sizeof(*minutiae));
+
+	view->minutiae = minutiae;
+	record->total_length += 6;
+	return &view->minutiae[view->number_minutiae++];
+}
+
+int iso_fmr_v20_encode(struct iso_fmr_v20 *record,
+		int (*putbyte)(int byte, void *context), void *context)
+{
+	uint16_t tmp16;
+	uint8_t reserved = 0;
+	int v;
+
+#define __put(field) \
+		do { \
+			int size = sizeof(field); \
+			while (size--) { \
+				int res = putbyte((field >> (size * 8)) & 0xff, context); \
+				if (res < 0) \
+					return res; \
+			} \
+		} while (0)
+
+	__put(record->format_id);
+	__put(record->version);
+	__put(record->total_length);
+	tmp16 = ((record->capture_equip_cert & 0xf) << 12) |
+			(record->capture_device_type_id & 0xfff);
+	__put(tmp16);
+	__put(record->size_x);
+	__put(record->size_y);
+	__put(record->resolution_x);
+	__put(record->resolution_y);
+	__put(record->number_views);
+	__put(reserved);
+
+	for (v = 0; v < record->number_views; v++) {
+		struct iso_fmr_v20_view *view = &record->views[v];
+		uint8_t tmp8;
+		int m;
+
+		__put(view->finger_position);
+		tmp8 = ((view->representation_number & 0xf) << 4) |
+				(view->impression_type & 0xf);
+		__put(tmp8);
+		__put(view->finger_quality);
+		__put(view->number_minutiae);
+
+		for (m = 0; m < view->number_minutiae; m++) {
+			struct iso_fmr_v20_minutia *minutia =
+					&view->minutiae[m];
+
+			tmp16 = ((minutia->type & 0x3) << 14) |
+					(minutia->x & 0x3fff);
+			__put(tmp16);
+			tmp16 = minutia->y & 0x3fff;
+			__put(tmp16);
+			__put(minutia->angle);
+			__put(minutia->quality);
+		}
+
+		__put(view->extended_data_block_length);
+		if (view->extended_data_block_length) {
+			size_t size = view->extended_data_block_length;
+			unsigned char *b = view->extended_data_block;
+
+			while (size--)
+				__put(*b++);
+		}
+	}
+
+#undef __put
+
+	return 0;
+}
+
+
 void iso_fmr_v20_free(struct iso_fmr_v20 *record)
 {
 	struct iso_fmr_v20_view *view;
