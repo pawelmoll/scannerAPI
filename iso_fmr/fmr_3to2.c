@@ -43,13 +43,6 @@ int main(int argc, char *argv[])
 			perror("Failed to open input file");
 			return 1;
 		}
-		if (argc - optind == 2) {
-			out = fopen(argv[optind + 1], "wb");
-			if (!in) {
-				perror("Failed to open output file");
-				return 1;
-			}
-		}
 	} else if (argc - optind > 2) {
 		usage(argv[0]);
 		return 1;
@@ -63,6 +56,9 @@ int main(int argc, char *argv[])
 				bytes);
 		return 1;
 	}
+
+	if (in != stdin)
+		fclose(in);
 
 	v20 = iso_fmr_v20_init();
 	if (!v20) {
@@ -132,18 +128,24 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	if (argc - optind == 2) {
+		out = fopen(argv[optind + 1], "wb");
+		if (!in) {
+			perror("Failed to open output file");
+			return 1;
+		}
+	}
+
 	if (iso_fmr_v20_encode(v20, (int (*)(int, void *))putc, out) < 0) {
 		perror("failed to write output file");
 		return 1;
 	}
 
-	iso_fmr_v030_free(v030);
-	iso_fmr_v20_free(v20);
-
-	if (in != stdin)
-		fclose(in);
 	if (out != stdout)
 		fclose(out);
+
+	iso_fmr_v030_free(v030);
+	iso_fmr_v20_free(v20);
 
 	return 0;
 }
